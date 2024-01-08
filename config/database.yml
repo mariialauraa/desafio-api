@@ -1,0 +1,21 @@
+default: &default
+  adapter: postgresql
+  encoding: unicode
+  user: postgres
+  password: 021281
+  host: localhost
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+
+development:
+  <<: *default
+  database: easy_pallet_api_development 
+
+test:
+  <<: *default
+  database: easy_pallet_api_test
+
+production:
+  <<: *default
+  database: easy_pallet_api_production
+  username: easy_pallet_api
+  password: <%= ENV["EASY_PALLET_API_DATABASE_PASSWORD"] %>
