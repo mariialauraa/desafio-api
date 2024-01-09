@@ -14,10 +14,12 @@ class UsersController < ApplicationController
     if @user && @user.authenticate(user_params[:password])
       token = encode_token({ user_id: @user.id })
       render json: { user: @user, token: token }, status: :ok
+    elsif @user
+      render json: { error: 'Senha inválida' }, status: :unprocessable_entity
     else
-      render json: { error: @user.errors.full_messages.to_sentence }, status: :unprocessable_entity
+      render json: { error: 'Usuário não encontrado' }, status: :not_found
     end
-  end
+  end  
 
   private
 
