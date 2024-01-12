@@ -3,9 +3,9 @@ Rails.application.routes.draw do
   namespace :admin, defaults: { format: :json } do
     namespace :v1 do
       get "home" => "home#index"
-      resources :users, only: [:create]
-      post "/login", to: "users#login"
+      resources :users
       resources :products
+      resources :loads
     end    
   end
   

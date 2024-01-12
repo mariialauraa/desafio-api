@@ -14,7 +14,7 @@ class ApplicationController < ActionController::API
       nil
     end
   end
-  end
+  end 
 
   #método para autorizar o usuário
   def authorized_user
@@ -36,5 +36,13 @@ class ApplicationController < ActionController::API
     errors['fields'] = fields if fields.present?
     errors['message'] = message if message.present?
     render json: { errors: errors }, status: status
+  end
+
+  #método para autenticar um usuário
+  def authenticate_user(login, password)
+    service = AuthenticationService.new(login: login, password: password)
+    user = service.authenticate
+    return service.generate_token(user.id) if user
+    nil
   end
 end
