@@ -29,4 +29,12 @@ class ApplicationController < ActionController::API
   def authorize
     render json: {message: 'Você precisa estar logado'}, status: :unauthorized unless authorized_user
   end
+
+  #método específico para renderizar os erros
+  def render_error(message: nil, fields: nil, status: :unprocessable_entity)
+    errors = {}
+    errors['fields'] = fields if fields.present?
+    errors['message'] = message if message.present?
+    render json: { errors: errors }, status: status
+  end
 end

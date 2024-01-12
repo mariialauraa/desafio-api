@@ -1,7 +1,6 @@
 FactoryBot.define do
-    factory :product do
-      sequence(:name) { |n| "Product #{n}" }
-      sequence(:ballast) { |n| "Ballast #{n}" }
-      image { Rack::Test::UploadedFile.new(Rails.root.join("spec/support/images/product_image.png")) }
-    end
+  factory :product do
+    sequence(:name) { |n| "#{Faker::Food.dish} #{n}" }
+    sequence(:ballast) { |n| "Lastro #{n}" }
   end
+end

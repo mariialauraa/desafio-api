@@ -5,6 +5,7 @@ Rails.application.routes.draw do
       get "home" => "home#index"
       resources :users, only: [:create]
       post "/login", to: "users#login"
+      resources :products
     end    
   end
   
