@@ -22,4 +22,6 @@ RSpec.describe Load, type: :model do
     subject.valid?
     expect(subject.errors.to_hash.keys).to_not include :delivery_date
   end
+
+  it_behaves_like "paginatable concern", :load
 end
