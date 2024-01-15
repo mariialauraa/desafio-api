@@ -5,16 +5,86 @@ RSpec.describe "Admin::V1::Products", type: :request do
 
   context "GET /products" do
     let(:url) { "/admin/v1/products" }
-    let!(:products) { create_list(:product, 5) }
+    let!(:products) { create_list(:product, 10) }
+    
+    context "without any params" do
+      it "returns 10 Products" do
+        get url, headers: auth_header(user)
+        expect(body_json['products'].count).to eq 10
+      end
+      
+      it "returns 10 first Products" do
+        get url, headers: auth_header(user)
+        expected_products = products[0..9].as_json(only: %i(id name ballast))
+        expect(body_json['products']).to contain_exactly *expected_products
+      end
 
-    it "returns all Products" do
-      get url, headers: auth_header(user)
-      expect(body_json['products']).to contain_exactly *products.as_json(only: %i(id name ballast))
+      it "returns success status" do
+        get url, headers: auth_header(user)
+        expect(response).to have_http_status(:ok)
+      end
     end
 
-    it "returns success status" do
-      get url, headers: auth_header(user)
-      expect(response).to have_http_status(:ok)
+    context "with search[name] param" do
+      let!(:search_name_products) do
+        products = [] 
+        15.times { |n| products << create(:product, name: "Search #{n + 1}") }
+        products 
+      end
+
+      let(:search_params) { { search: { name: "Search" } } }
+
+      it "returns only seached products limited by default pagination" do
+        get url, headers: auth_header(user), params: search_params
+        expected_products = search_name_products[0..9].map do |product|
+          product.as_json(only: %i(id name ballast))
+        end
+        expect(body_json['products']).to contain_exactly *expected_products
+      end
+
+      it "returns success status" do
+        get url, headers: auth_header(user), params: search_params
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context "with pagination params" do
+      let(:page) { 2 }
+      let(:length) { 5 }
+
+      let(:pagination_params) { { page: page, length: length } }
+
+      it "returns records sized by :length" do
+        get url, headers: auth_header(user), params: pagination_params
+        expect(body_json['products'].count).to eq length
+      end
+      
+      it "returns products limited by pagination" do
+        get url, headers: auth_header(user), params: pagination_params
+        expected_products = products[5..9].as_json(only: %i(id name ballast))
+        expect(body_json['products']).to contain_exactly *expected_products
+      end
+
+      it "returns success status" do
+        get url, headers: auth_header(user), params: pagination_params
+        expect(response).to have_http_status(:ok)
+      end
+    end
+
+    context "with order params" do
+      let(:order_params) { { order: { name: 'desc' } } }
+
+      it "returns ordered products limited by default pagination" do
+        get url, headers: auth_header(user), params: order_params
+        products.sort! { |a, b| b[:name] <=> a[:name]}
+        expected_products = products[0..9].as_json(only: %i(id name ballast))
+        expect(body_json['products']).to contain_exactly *expected_products
+      end
+ 
+      it "returns success status" do
+        get url, headers: auth_header(user), params: order_params
+        expect(response).to have_http_status(:ok)
+      end
     end
   end
 
@@ -62,6 +132,22 @@ RSpec.describe "Admin::V1::Products", type: :request do
         post url, headers: auth_header(user), params: product_invalid_params
         expect(response).to have_http_status(:unprocessable_entity)
       end
+    end
+  end
+
+  context "GET /products/:id" do
+    let(:product) { create(:product) }
+    let(:url) { "/admin/v1/products/#{product.id}" }
+
+    it "returns requested Product" do
+      get url, headers: auth_header(user)
+      expected_product = product.as_json(only: %i(id name ballast))
+      expect(body_json['product']).to eq expected_product
+    end
+
+    it "returns success status" do
+      get url, headers: auth_header(user)
+      expect(response).to have_http_status(:ok)
     end
   end
 
