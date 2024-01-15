@@ -45,4 +45,11 @@ class ApplicationController < ActionController::API
     return service.generate_token(user.id) if user
     nil
   end
+
+  def logout_user(user_id)
+    service = AuthenticationService.new(login: nil, password: nil)
+    service.logout(user_id)
+  rescue => e    
+    Rails.logger.error("Erro ao realizar logout: #{e.message}")
+  end
 end

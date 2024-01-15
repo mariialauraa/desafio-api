@@ -32,7 +32,7 @@ module Admin::V1
 
     def product_params
       return {} unless params.has_key?(:product)
-      params.require(:product).permit(:id, :name, :ballast)
+      params.require(:product).permit(:name, :ballast)
     end
 
     def save_product!

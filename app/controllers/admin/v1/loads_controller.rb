@@ -32,7 +32,7 @@ module Admin::V1
 
     def load_params
       return {} unless params.has_key?(:load)
-      params.require(:load).permit(:id, :code, :delivery_date)
+      params.require(:load).permit(:code, :delivery_date)
     end
 
     def save_load!

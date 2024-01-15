@@ -1,8 +1,8 @@
 module Admin::V1 
   class UsersController < ApplicationController
     before_action :authorize, except: :create
+    before_action :load_user, only: [:update, :destroy]    
     
-    #responsável por autenticar um usuário e gerar um token
     def login
       service = AuthenticationService.new(login: user_params[:login], password: user_params[:password])
 
@@ -12,9 +12,17 @@ module Admin::V1
     rescue => e
       handle_authentication_error(e.message)
     end 
+
+    def logout
+      service = AuthenticationService.new(login: user_params[:login], password: user_params[:password])
+      service.logout(@user.id)
+      render json: { message: 'Logout realizado com sucesso' }, status: :ok
+    rescue => e
+      render json: { error: e.message }, status: :unprocessable_entity
+    end
     
     def index
-      @users = User.all
+      @users = User.limit(10)
     end
     
     def create
@@ -48,6 +56,11 @@ module Admin::V1
     end
 
     private
+
+    def load_user
+      @user = User.find(params[:id])
+      render json: { error: 'Usuário não encontrado' }, status: :not_found unless @user
+    end
     
     def user_params
       return {} unless params.has_key?(:user)
