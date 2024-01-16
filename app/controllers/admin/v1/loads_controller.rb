@@ -1,10 +1,10 @@
 module Admin::V1 
   class LoadsController < ApplicationController
     before_action :authorize
-    before_action :load_load, only: [:update, :destroy]
+    before_action :load_load, only: [:show, :update, :destroy]
     
     def index
-      @loads = Load.all
+      @loads = load_loads
     end
 
     def create
@@ -12,6 +12,8 @@ module Admin::V1
       @load.attributes = load_params 
       save_load!  
     end
+
+    def show; end
 
     def update      
       @load.attributes = load_params
@@ -28,6 +30,11 @@ module Admin::V1
 
     def load_load
       @load = Load.find(params[:id])
+    end
+
+    def load_loads
+      permitted = params.permit(:page, :length)
+      Admin::ModelLoadingService.new(Load.all, permitted).call
     end
 
     def load_params

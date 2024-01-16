@@ -1,28 +1,35 @@
 module Admin::V1 
   class UsersController < ApplicationController
-    before_action :authorize, except: :create
-    before_action :load_user, only: [:update, :destroy]    
+    before_action :authorize, except: [:create, :login]
+    before_action :load_user, only: [:show, :update, :destroy]    
     
     def login
       service = AuthenticationService.new(login: user_params[:login], password: user_params[:password])
 
       @user = service.authenticate
-      token = service.generate_token(@user.id)
+      token = encode_token(user_id: @user.id)
       render json: { user: @user, token: token }, status: :ok
     rescue => e
       handle_authentication_error(e.message)
     end 
 
     def logout
-      service = AuthenticationService.new(login: user_params[:login], password: user_params[:password])
-      service.logout(@user.id)
-      render json: { message: 'Logout realizado com sucesso' }, status: :ok
+      #decodifica o token para obter as informações do usuário
+      user_info = decode_token
+    
+      if user_info
+        service = AuthenticationService.new(login: user_info[0]['login'], password: user_info[0]['password'])
+        service.logout(user_info[0]['user_id'])
+        render json: { message: 'Logout realizado com sucesso' }, status: :ok
+      else
+        render json: { error: 'Token inválido ou ausente' }, status: :unauthorized
+      end
     rescue => e
       render json: { error: e.message }, status: :unprocessable_entity
-    end
+    end    
     
     def index
-      @users = User.limit(10)
+      @users = load_users
     end
     
     def create
@@ -35,36 +42,33 @@ module Admin::V1
       end
     end
 
+    def show; end
+
     def update
-      @user = User.find(params[:id])
-      
-      if @user.update(user_params)
-        render json: { user: @user }, status: :ok
-      else
-        render json: { error: @user.errors.full_messages.to_sentence }, status: :unprocessable_entity
-      end
+      @user.attributes = user_params
+      save_user!
     end
 
     def destroy
-      @user = User.find(params[:id])
-      
-      if @user.destroy
-        render json: { message: 'Usuário deletado com sucesso' }, status: :ok
-      else
-        render json: { error: 'Não foi possível deletar o usuário' }, status: :unprocessable_entity
-      end
+      @user.destroy!
+    rescue
+      render_error(fields: @user.errors.messages)
     end
 
     private
 
     def load_user
       @user = User.find(params[:id])
-      render json: { error: 'Usuário não encontrado' }, status: :not_found unless @user
+    end
+
+    def load_users
+      permitted = params.permit({ search: :name }, { order: {} }, :page, :length)
+      Admin::ModelLoadingService.new(User.all, permitted).call
     end
     
     def user_params
       return {} unless params.has_key?(:user)
-      params.permit(:name, :login, :password)
+      params.require(:user).permit(:name, :login, :password)
     end
 
     def save_user!

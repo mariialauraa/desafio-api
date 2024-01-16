@@ -5,16 +5,47 @@ RSpec.describe "Admin::V1::Loads", type: :request do
 
   context "GET /loads" do
     let(:url) { "/admin/v1/loads" }
-    let!(:loads) { create_list(:load, 5) }
+    let!(:loads) { create_list(:load, 10) }
 
-    it "returns all Loads" do
-      get url, headers: auth_header(user)
-      expect(body_json['loads']).to contain_exactly *loads.as_json(only: %i(id code delivery_date))
+    context "without any params" do
+      it "returns 10 Loads" do
+        get url, headers: auth_header(user)
+        expect(body_json['loads'].count).to eq 10
+      end
+      
+      it "returns 10 first Loads" do
+        get url, headers: auth_header(user)
+        expected_loads = loads[0..9].as_json(only: %i(id code delivery_date))
+        expect(body_json['loads']).to contain_exactly *expected_loads
+      end
+
+      it "returns success status" do
+        get url, headers: auth_header(user)
+        expect(response).to have_http_status(:ok)
+      end
     end
 
-    it "returns success status" do
-      get url, headers: auth_header(user)
-      expect(response).to have_http_status(:ok)
+    context "with pagination params" do
+      let(:page) { 2 }
+      let(:length) { 5 }
+
+      let(:pagination_params) { { page: page, length: length } }
+
+      it "returns records sized by :length" do
+        get url, headers: auth_header(user), params: pagination_params
+        expect(body_json['loads'].count).to eq length
+      end
+      
+      it "returns loads limited by pagination" do
+        get url, headers: auth_header(user), params: pagination_params
+        expected_loads = loads[5..9].as_json(only: %i(id code delivery_date))
+        expect(body_json['loads']).to contain_exactly *expected_loads
+      end
+
+      it "returns success status" do
+        get url, headers: auth_header(user), params: pagination_params
+        expect(response).to have_http_status(:ok)
+      end
     end
   end
 
@@ -62,6 +93,22 @@ RSpec.describe "Admin::V1::Loads", type: :request do
         post url, headers: auth_header(user), params: load_invalid_params
         expect(response).to have_http_status(:unprocessable_entity)
       end
+    end
+  end
+
+  context "GET /loads/:id" do
+    let(:load) { create(:load) }
+    let(:url) { "/admin/v1/loads/#{load.id}" }
+
+    it "returns requested Load" do
+      get url, headers: auth_header(user)
+      expected_load = load.as_json(only: %i(id code delivery_date))
+      expect(body_json['load']).to eq expected_load
+    end
+
+    it "returns success status" do
+      get url, headers: auth_header(user)
+      expect(response).to have_http_status(:ok)
     end
   end
 

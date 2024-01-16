@@ -3,9 +3,13 @@ Rails.application.routes.draw do
   namespace :admin, defaults: { format: :json } do
     namespace :v1 do
       get "home" => "home#index"
-      resources :users
-      resources :products
+      post "login" => "users#login"
+      delete "logout" => "users#logout"
+      
       resources :loads
+      resources :products
+      resources :users      
+      
     end    
   end
   
