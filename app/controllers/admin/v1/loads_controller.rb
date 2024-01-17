@@ -4,7 +4,8 @@ module Admin::V1
     before_action :load_load, only: [:show, :update, :destroy]
     
     def index
-      @loads = load_loads
+      @loading_service = Admin::ModelLoadingService.new(Load.all, searchable_params)
+      @loading_service.call
     end
 
     def create
@@ -32,9 +33,8 @@ module Admin::V1
       @load = Load.find(params[:id])
     end
 
-    def load_loads
-      permitted = params.permit(:page, :length)
-      Admin::ModelLoadingService.new(Load.all, permitted).call
+    def searchable_params
+      params.permit(:page, :length)
     end
 
     def load_params

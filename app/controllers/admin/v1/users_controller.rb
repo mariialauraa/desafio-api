@@ -29,7 +29,8 @@ module Admin::V1
     end    
     
     def index
-      @users = load_users
+      @loading_service = Admin::ModelLoadingService.new(User.all, searchable_params)
+      @loading_service.call
     end
     
     def create
@@ -61,9 +62,8 @@ module Admin::V1
       @user = User.find(params[:id])
     end
 
-    def load_users
-      permitted = params.permit({ search: :name }, { order: {} }, :page, :length)
-      Admin::ModelLoadingService.new(User.all, permitted).call
+    def searchable_params
+      params.permit({ search: :name }, { order: {} }, :page, :length)
     end
     
     def user_params
