@@ -1,32 +1,7 @@
 module Admin::V1 
   class UsersController < ApplicationController
-    before_action :authorize, except: [:create, :login]
-    before_action :load_user, only: [:show, :update, :destroy]    
-    
-    def login
-      service = AuthenticationService.new(login: user_params[:login], password: user_params[:password])
-
-      @user = service.authenticate
-      token = encode_token(user_id: @user.id)
-      render json: { user: @user, token: token }, status: :ok
-    rescue => e
-      handle_authentication_error(e.message)
-    end 
-
-    def logout
-      #decodifica o token para obter as informações do usuário
-      user_info = decode_token
-    
-      if user_info
-        service = AuthenticationService.new(login: user_info[0]['login'], password: user_info[0]['password'])
-        service.logout(user_info[0]['user_id'])
-        render json: { message: 'Logout realizado com sucesso' }, status: :ok
-      else
-        render json: { error: 'Token inválido ou ausente' }, status: :unauthorized
-      end
-    rescue => e
-      render json: { error: e.message }, status: :unprocessable_entity
-    end    
+    before_action :authorize, except: :create
+    before_action :set_user, only: [:show, :update, :destroy]    
     
     def index
       @loading_service = Admin::ModelLoadingService.new(User.all, searchable_params)
@@ -58,7 +33,7 @@ module Admin::V1
 
     private
 
-    def load_user
+    def set_user
       @user = User.find(params[:id])
     end
 
@@ -76,15 +51,6 @@ module Admin::V1
       render :show
     rescue
       render_error(fields: @user.errors.messages)
-    end
-
-    def handle_authentication_error(message)
-      case message
-      when 'Senha inválida'
-        render json: { error: 'Senha inválida' }, status: :unprocessable_entity
-      else
-        render json: { error: 'Usuário não encontrado' }, status: :not_found
-      end
     end
   end
 end

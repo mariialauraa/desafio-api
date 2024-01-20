@@ -3,13 +3,12 @@ Rails.application.routes.draw do
   namespace :admin, defaults: { format: :json } do
     namespace :v1 do
       get "home" => "home#index"
-      post "login" => "users#login"
-      delete "logout" => "users#logout"
+      post '/login', to: 'authentication#login'
+      post '/logout', to: 'authentication#logout'
       
       resources :loads
       resources :products
-      resources :users      
-      
+      resources :users       
     end    
   end
   

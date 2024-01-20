@@ -1,7 +1,7 @@
 module Admin::V1
   class ProductsController < ApplicationController
     before_action :authorize
-    before_action :load_product, only: [:show, :update, :destroy]
+    before_action :set_product, only: [:show, :update, :destroy]
 
     def index
       @loading_service = Admin::ModelLoadingService.new(Product.all, searchable_params)
@@ -29,7 +29,7 @@ module Admin::V1
 
     private
 
-    def load_product
+    def set_product
       @product = Product.find(params[:id])
     end
 

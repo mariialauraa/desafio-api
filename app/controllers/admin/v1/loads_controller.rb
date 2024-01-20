@@ -1,7 +1,7 @@
 module Admin::V1 
   class LoadsController < ApplicationController
     before_action :authorize
-    before_action :load_load, only: [:show, :update, :destroy]
+    before_action :set_load, only: [:show, :update, :destroy]
     
     def index
       @loading_service = Admin::ModelLoadingService.new(Load.all, searchable_params)
@@ -29,7 +29,7 @@ module Admin::V1
 
     private
 
-    def load_load
+    def set_load
       @load = Load.find(params[:id])
     end
 
