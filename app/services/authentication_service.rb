@@ -11,11 +11,12 @@ class AuthenticationService
   # método para autenticar um usuário
   def authenticate
     user = User.find_by(login: @login)
+    
     if user && user.authenticate(@password)
       return user unless BLACKLIST.include?(user.id)
     end
     
-    raise 'Senha inválida ou usuário não encontrado'
+    return nil
   end
 
   # gera um token JWT para um usuário específico

@@ -8,38 +8,34 @@ module Admin::V1
       token = encode_token(user_id: @user.id)
       render json: { user: @user, token: token }, status: :ok
     rescue => e
-      handle_authentication_error(e.message)
+        render json: { error: 'Usuário não encontrado ou Senha inválida' }, status: :not_found
     end
 
     def logout
-      # decodifica o token para obter as informações do usuário
-      user_info = decode_token
-
-      if user_info
-        service = AuthenticationService.new(login: user_info[0]['login'], password: user_info[0]['password'])
-        service.logout(user_info[0]['user_id'])
-        render json: { message: 'Logout realizado com sucesso' }, status: :ok
+      # obtém o token do cabeçalho da requisição
+      authorization_header = request.headers['Authorization']
+    
+      if authorization_header.present? && authorization_header.split(' ').length == 2
+        token = authorization_header.split(' ').last
+        service = AuthenticationService.new(login: nil, password: nil)
+        
+        if service.logout(token)
+          render json: { message: 'Logout realizado com sucesso' }, status: :ok
+        else
+          render json: { error: 'Erro ao realizar logout' }, status: :unprocessable_entity
+        end
       else
         render json: { error: 'Token inválido ou ausente' }, status: :unauthorized
       end
     rescue => e
       render json: { error: e.message }, status: :unprocessable_entity
-    end
+    end    
 
     private
 
     def user_params
       return {} unless params.has_key?(:user)
       params.require(:user).permit(:login, :password)
-    end
-
-    def handle_authentication_error(message)
-      case message
-      when 'Senha inválida'
-        render json: { error: 'Senha inválida' }, status: :unprocessable_entity
-      else
-        render json: { error: 'Usuário não encontrado' }, status: :not_found
-      end
     end
   end
 end
