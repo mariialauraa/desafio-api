@@ -30,7 +30,11 @@ module Admin::V1
     private
 
     def set_product
-      @product = Product.find(params[:id])
+      @product = Product.find_by_id(params[:id])
+
+      if @product.nil?
+        render(status: 404, json: { error: "Produto não encontrado." })
+      end
     end
 
     def searchable_params

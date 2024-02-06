@@ -34,7 +34,11 @@ module Admin::V1
     private
 
     def set_user
-      @user = User.find(params[:id])
+      @user = User.find_by_id(params[:id])
+
+      if @user.nil?
+        render(status: 404, json: { error: "Usuário não encontrado." })
+      end
     end
 
     def searchable_params
@@ -43,7 +47,7 @@ module Admin::V1
     
     def user_params
       return {} unless params.has_key?(:user)
-      params.require(:user).permit(:name, :login, :password)
+      params.require(:user).permit(:id, :name, :login, :password)
     end
 
     def save_user!

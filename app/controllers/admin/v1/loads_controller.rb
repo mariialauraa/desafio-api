@@ -30,7 +30,11 @@ module Admin::V1
     private
 
     def set_load
-      @load = Load.find(params[:id])
+      @load = Load.find_by_id(params[:id])
+
+      if @load.nil?
+        render(status: 404, json: { error: "Carga não encontrada." })
+      end
     end
 
     def searchable_params
