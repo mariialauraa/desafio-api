@@ -1,7 +1,7 @@
 class User < ApplicationRecord
   has_secure_password
 
-  include NameSearchable
+  include LikeSearchable
   include Paginatable
   
   validates :name, presence: true

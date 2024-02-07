@@ -24,4 +24,5 @@ RSpec.describe Load, type: :model do
   end
 
   it_behaves_like "paginatable concern", :load
+  it_behaves_like "like searchable concern", :load, :code
 end
