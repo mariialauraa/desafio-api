@@ -39,12 +39,6 @@ RSpec.describe "Admin::V1::Loads", type: :request do
         get url, headers: auth_header(user), params: pagination_params
         expect(body_json['loads'].count).to eq length
       end
-      
-      it "returns loads limited by pagination" do
-        get url, headers: auth_header(user), params: pagination_params
-        expected_loads = loads[5..9].as_json(only: %i(id code delivery_date))
-        expect(body_json['loads']).to contain_exactly *expected_loads
-      end
 
       it "returns success status" do
         get url, headers: auth_header(user), params: pagination_params

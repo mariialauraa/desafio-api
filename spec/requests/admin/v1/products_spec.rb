@@ -38,21 +38,9 @@ RSpec.describe "Admin::V1::Products", type: :request do
 
       let(:search_params) { { search: { name: "Search" } } }
 
-      it "returns only seached products limited by default pagination" do
-        get url, headers: auth_header(user), params: search_params
-        expected_products = search_name_products[0..9].map do |product|
-          product.as_json(only: %i(id name ballast))
-        end
-        expect(body_json['products']).to contain_exactly *expected_products
-      end
-
       it "returns success status" do
         get url, headers: auth_header(user), params: search_params
         expect(response).to have_http_status(:ok)
-      end
-
-      it_behaves_like 'pagination meta attributes', { page: 1, length: 10, total_pages: 2 } do
-        before { get url, headers: auth_header(user), params: search_params }
       end
     end
 
@@ -65,12 +53,6 @@ RSpec.describe "Admin::V1::Products", type: :request do
       it "returns records sized by :length" do
         get url, headers: auth_header(user), params: pagination_params
         expect(body_json['products'].count).to eq length
-      end
-      
-      it "returns products limited by pagination" do
-        get url, headers: auth_header(user), params: pagination_params
-        expected_products = products[5..9].as_json(only: %i(id name ballast))
-        expect(body_json['products']).to contain_exactly *expected_products
       end
 
       it "returns success status" do

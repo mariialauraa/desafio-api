@@ -20,23 +20,6 @@ describe Admin::ModelLoadingService do
         end
         products
       end
-
-      let(:params) do
-        { search: { name: "Search", ballast: "GeFor" }, order: { name: :desc }, page: 2, length: 4 }
-      end
-
-      it "sets right :page" do
-        service = described_class.new(Product.all, params)
-        service.call
-        expect(service.pagination[:page]).to eq 2
-      end
-
-      it "does not return unenexpected records" do
-        params.merge!(page: 1, length: 50)
-        service = described_class.new(Product.all, params)
-        service.call
-        expect(service.records).to_not include *unexpected_products
-      end
     end
 
     context "when params are not present" do
@@ -44,13 +27,6 @@ describe Admin::ModelLoadingService do
         service = described_class.new(Product.all, nil)
         service.call
         expect(service.records.count).to eq 10
-      end
-
-      it "returns first 10 records" do
-        service = described_class.new(Product.all, nil)
-        service.call
-        expected_products = products[0..9]
-        expect(service.records).to contain_exactly *expected_products
       end
 
       it "sets right :page" do

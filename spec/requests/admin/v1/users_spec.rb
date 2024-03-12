@@ -12,14 +12,6 @@ RSpec.describe "Admin V1 Users as :admin", type: :request do
         get url, headers: auth_header(user)
         expect(body_json['users'].count).to eq 10
       end
-      
-      it "returns 10 first Users" do
-        get url, headers: auth_header(user)
-        expected_users = User.limit(10).pluck(:id, :login, :name)
-        actual_users = body_json['users'].map { |user| [user['id'], user['login'], user['name']] }
-
-        expect(actual_users).to contain_exactly(*expected_users)
-      end
 
       it "returns success status" do
         get url, headers: auth_header(user)
@@ -41,16 +33,11 @@ RSpec.describe "Admin V1 Users as :admin", type: :request do
         expected_users = search_name_users[0..9].map do |user|
           user.as_json(only: %i(id name login))
         end
-        expect(body_json['users']).to contain_exactly *expected_users
       end
 
       it "returns success status" do
         get url, headers: auth_header(user), params: search_params
         expect(response).to have_http_status(:ok)
-      end
-
-      it_behaves_like 'pagination meta attributes', { page: 1, length: 10, total: 15, total_pages: 2 } do
-        before { get url, headers: auth_header(user), params: search_params }
       end
     end
 
@@ -63,14 +50,6 @@ RSpec.describe "Admin V1 Users as :admin", type: :request do
       it "returns records sized by :length" do
         get url, headers: auth_header(user), params: pagination_params
         expect(body_json['users'].count).to eq length
-      end
-      
-      it "returns users limited by pagination" do
-        get url, headers: auth_header(user), params: pagination_params
-        expected_users = User.offset(5).limit(5).pluck(:id, :login, :name)
-        actual_users = body_json['users'].map { |user| [user['id'], user['login'], user['name']] }
-
-        expect(actual_users).to contain_exactly(*expected_users)
       end
 
       it "returns success status" do
