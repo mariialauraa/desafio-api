@@ -9,7 +9,12 @@ Rails.application.routes.draw do
       resources :loads
       resources :products
       resources :users
-      resources :orders     
+      resources :orders do
+        member do
+          get 'list_order_products'
+        end
+      end
+      resources :order_products
     end    
   end
   

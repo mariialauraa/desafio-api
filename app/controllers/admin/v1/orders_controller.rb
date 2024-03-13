@@ -26,6 +26,11 @@ module Admin::V1
       rescue
         render_error(fields: @order.errors.messages)
       end
+
+      def list_order_products
+        @order = Order.find_by_id(params[:id])
+        @order_products = @order.order_products
+      end
   
       private
   
