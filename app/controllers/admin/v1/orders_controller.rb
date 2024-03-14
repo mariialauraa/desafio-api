@@ -28,8 +28,7 @@ module Admin::V1
       end
 
       def list_order_products
-        @order = Order.find_by_id(params[:id])
-        @order_products = @order.order_products
+        @order_products = @order&.order_products || []
       end
   
       private

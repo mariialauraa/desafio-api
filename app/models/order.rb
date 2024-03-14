@@ -1,4 +1,7 @@
 class Order < ApplicationRecord
+  include Paginatable
+  include LikeSearchable
+  
   belongs_to :load
   has_many :order_products
 
