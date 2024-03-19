@@ -4,15 +4,24 @@ module Admin::V1
       before_action :set_order, only: [:show, :update, :destroy]
       
       def index
-        @loading_service = Admin::ModelLoadingService.new(Order.all, searchable_params)
+        if params[:load_id].present?
+          load = Load.find_by_id(params[:load_id])
+          if load.nil?
+            render(status: 404, json: { error: "Carga não encontrada." })
+            return
+          end
+          @loading_service = Admin::ModelLoadingService.new(load.orders, searchable_params)
+        else
+          @loading_service = Admin::ModelLoadingService.new(Order.all, searchable_params)
+        end
         @loading_service.call
       end
   
       def create
-        @order = Order.new
-        @order.attributes = order_params 
-        save_order!  
-      end
+        @load = Load.find(params[:load_id])
+        @order = @load.orders.build(order_params)
+        save_order!
+      end      
   
       def show; end
   
