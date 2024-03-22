@@ -12,7 +12,7 @@ class OrderProduct < ApplicationRecord
   private
 
   def check_box_uniqueness
-    if OrderProduct.where(product_id: product_id, box: box).where.not(id: id).exists?
+    if OrderProduct.where(order_id: order_id, product_id: product_id, box: box).where.not(id: id).exists?
       errors.add(:box, "Já existe um produto com o mesmo product_id e box definido como #{box ? 'true' : 'false'}")
     end
   end

@@ -4,13 +4,21 @@ module Admin::V1
       before_action :set_order_product, only: [:show, :update, :destroy]
       
       def index
-        @order_products = OrderProduct.all
-      end
+        if params[:order_id].present?
+          @order_products = OrderProduct.includes(:product).where(order_id: params[:order_id])
+      
+          if @order_products.empty?
+            render json: { error: 'Produtos da lista específica não foram encontrados.' }, status: :not_found
+          end
+        else
+          render json: { error: 'ID da ordem não fornecido.' }, status: :bad_request
+        end
+      end                    
   
       def create
-        @order_product = OrderProduct.new
-        @order_product.attributes = order_product_params 
-        save_order_product!  
+        @order = Order.find(params[:order_id]) 
+        @order_product = @order.order_products.build(order_product_params)       
+        save_order_product! 
       end
   
       def show; end
