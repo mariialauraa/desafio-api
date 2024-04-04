@@ -5,8 +5,9 @@ class OrderProduct < ApplicationRecord
   validates :order_id, presence: true
   validates :product_id, presence: true
   validates :quantity, presence: true
+  validates :quantity, presence: true, format: { with: /\A\d+\z/, message: "deve conter apenas números" }
+  
   validates :box, inclusion: { in: [true, false] }
-
   validate :check_box_uniqueness
 
   private

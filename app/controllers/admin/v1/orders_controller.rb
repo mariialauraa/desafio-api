@@ -30,10 +30,13 @@ module Admin::V1
         save_order!
       end
   
-      def destroy      
-        @order.destroy!
-      rescue
-        render_error(fields: @order.errors.messages)
+      def destroy
+        ActiveRecord::Base.transaction do
+          @order.order_products.each(&:destroy!)
+          @order.destroy!
+        end
+      rescue ActiveRecord::RecordNotDestroyed
+        render_error(fields: { order: ['não pode ser deletado porque possui produtos associados que não puderam ser removidos.'] }, status: :unprocessable_entity)
       end
 
       def list_order_products
