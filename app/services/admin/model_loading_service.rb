@@ -6,7 +6,7 @@ module Admin
       @searchable_model = searchable_model
       # Assegura que params seja tratado corretamente, seja nil ou um ActionController::Parameters
       params = ActionController::Parameters.new({}).permit! if params.nil?
-      @params = params.permit(:page, :length, order: {}).to_h.deep_symbolize_keys
+      @params = params.permit(:page, :length, order: {}, search: [:name]).to_h.deep_symbolize_keys
       @records = []
       @pagination = {}
     end    
