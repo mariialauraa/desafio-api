@@ -1,8 +1,8 @@
 FactoryBot.define do
   factory :order_product do
-    order_id { 1 }
-    product_id { 1 }
-    quantity { "1" }
-    box { false }
+    association :order
+    association :product
+    quantity { 1 }
+    box { Faker::Boolean.boolean }
   end
 end
